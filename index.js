@@ -2,12 +2,9 @@ require("dotenv").config();
 
 const config = require("./config.json");
 const mongoose = require("mongoose");
-mongoose.connect(connectionString, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    ssl: false,
-    tlsAllowInvalidCertificates: true,
-});
+mongoose.connect(
+    "mongodb+srv://bttarasenko:RpiV8YUeKc0rWtq6@cluster0.ojgbx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+);
 
 const User = require("./models/user.model");
 const Note = require("./models/note.model");
