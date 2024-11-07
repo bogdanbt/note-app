@@ -4,14 +4,16 @@ const courseSchema = new mongoose.Schema({
     id: String,
     title: String,
     description: String,
-    date: String,
     foto: String,
+    teacherId: {
+        type: String,
+    },
     students: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User", // Ссылка на модель пользователя
+            type: String,
         },
     ],
+    lessonIds: [{ type: String }], // лучше не трогать
 });
 
 const Course = mongoose.model("Course", courseSchema);

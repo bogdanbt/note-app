@@ -8,13 +8,14 @@ function authenticateToken(req, res, next) {
         return res.status(401).json({ message: "Неавторизован" }); // Сообщение об ошибке при отсутствии токена
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ message: "Недействительный токен" }); // Сообщение об ошибке при недействительном токене
-        }
-        req.user = user;
-        next(); // Передаём управление следующему middleware или функции маршрута
-    });
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        req.user = decoded; // decoded.email будет доступен, если email добавлен в токен
+        next();
+    } catch (error) {
+        console.error("Ошибка аутентификации:", error);
+        return res.status(403).json({ message: "Недействительный токен" });
+    }
 }
 
 module.exports = {
