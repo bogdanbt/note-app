@@ -847,34 +847,35 @@ app.get("/students/details", async (req, res) => {
         const students = await User.find({ role: "student" }).select(
             "fullName email"
         );
-
+        console.log(students);
         const studentDetails = await Promise.all(
             students.map(async (student) => {
                 // Получение курсов, где зарегистрирован студент
                 const courses = await Course.find({
-                    students: student._id,
-                }).select("title");
-
+                    students: student.email,
+                }).select("title id");
+                console.log(courses);
                 // Подготовка статистики по каждому курсу
                 const courseStats = await Promise.all(
                     courses.map(async (course) => {
                         // Подсчет посещенных уроков
-                        const attendedLessons = await Lesson.countDocuments({
-                            courseId: course._id,
-                            "attendees.studentId": student._id,
-                            "attendees.attended": true,
-                        });
+                        // const attendedLessons = await Lesson.countDocuments({
+                        //     courseId: course._id,
+                        //     "attendees.studentId": student.email,
+                        //     "attendees.attended": true,
+                        // });
 
                         // Подсчет ваучеров на курс
                         const totalVouchers = await Voucher.countDocuments({
-                            userId: student._id,
-                            courseId: course._id,
+                            userId: student.email,
+                            courseId: course.id,
                         });
 
+                        console.log(course.id, course.title, totalVouchers);
                         return {
-                            courseId: course._id,
+                            courseId: course.id,
                             courseTitle: course.title,
-                            attendedLessons,
+                            // attendedLessons,
                             totalVouchers,
                         };
                     })
@@ -996,9 +997,36 @@ app.get("/reportbook/by-date-range", authenticateToken, async (req, res) => {
             },
         });
 
-        console.log("Найденные отчеты:", reports); // Проверка данных, найденных в базе
+        // console.log("Найденные отчеты:", reports); // Проверка данных, найденных в базе
+        // Получаем уникальные courseId для поиска названий курсов
+        const courseIds = [
+            ...new Set(reports.map((report) => report.courseId)),
+        ];
+        const userIds = [...new Set(reports.map((report) => report.userId))];
+        console.log(userIds);
+        // Находим названия курсов по их courseId
+        const courses = await Course.find({ id: { $in: courseIds } });
+        const users = await User.find({ email: { $in: userIds } });
+        console.log(users);
+        // Создаем словарь courseId -> title для быстрой подстановки
+        const courseTitles = {};
+        courses.forEach((course) => {
+            courseTitles[course.id] = course.title;
+        });
+        const userFullName = {};
+        users.forEach((user) => {
+            userFullName[user.email] = user.fullName;
+        });
+        console.log(userFullName);
+        // Добавляем названия курсов в отчеты
+        const formattedReports = reports.map((report) => ({
+            ...report._doc,
+            courseTitle: courseTitles[report.courseId] || "Unknown Course",
+            userFullName: userFullName[report.userId] || "Unknown Course",
+        }));
 
-        res.status(200).json(reports);
+        res.status(200).json(formattedReports);
+        // res.status(200).json(reports);
     } catch (error) {
         console.error("Ошибка при получении отчетов:", error);
         res.status(500).json({ message: "Ошибка при получении отчетов" });
