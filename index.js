@@ -23,8 +23,8 @@ app.use(express.json());
 
 app.use(
     cors({
-        //origin: "*",
-        origin: "https://fun-kids.netlify.app", // Укажите URL вашего фронтенда
+        origin: "*",
+        //origin: "https://fun-kids.netlify.app", // Укажите URL вашего фронтенда
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true,
     })
@@ -492,12 +492,16 @@ app.delete(
 // Курсы, где текущий пользователь - студент
 app.get("/courses/student", authenticateToken, async (req, res) => {
     try {
-        const courses = await Course.find({ students: { $in: [req.user.id] } });
+        console.log(req);
+        const courses = await Course.find({
+            students: { $in: [req.user.email] },
+        });
         res.json(courses);
     } catch (error) {
         res.status(500).json({ message: "Ошибка получения курсов" });
     }
 });
+
 // Курсы, где текущий пользователь - учитель
 app.get("/courses/teacher", authenticateToken, async (req, res) => {
     try {
