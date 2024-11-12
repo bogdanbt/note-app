@@ -756,9 +756,55 @@ app.get("/courses/list", authenticateToken, async (req, res) => {
         res.status(500).json({ message: "Ошибка при получении списка курсов" });
     }
 });
+// app.post("/admin/payment", async (req, res) => {
+//     try {
+//         console.log("Данные, полученные на сервере:", req.body);
+
+//         const {
+//             userId,
+//             courseId,
+//             amount,
+//             numberOfVouchers,
+//             paymentMethod,
+//             paymentDate,
+//         } = req.body;
+//         // Расчет суммы для каждого ваучера
+//         const voucherAmount = amount / numberOfVouchers;
+//         // Создание записи о платеже
+//         const payment = new Payment({
+//             userId,
+//             courseId,
+//             amount,
+//             numberOfVouchers,
+//             paymentMethod,
+//             paymentDate,
+//             description: `Оплата за ${numberOfVouchers} ваучеров для курса ${courseId}`,
+//         });
+
+//         await payment.save();
+
+//         // Создание ваучеров
+//         for (let i = 0; i < numberOfVouchers; i++) {
+//             await Voucher.create({
+//                 userId,
+//                 courseId,
+//                 amount: voucherAmount, // Используем рассчитанное значение
+
+//                 description: "Оплаченный ваучер",
+//             });
+//         }
+//         res.status(201).json({
+//             message: "Платеж обработан и ваучеры созданы",
+//             payment,
+//         });
+//     } catch (error) {
+//         console.error("Ошибка при обработке платежа:", error);
+//         res.status(500).json({ message: "Ошибка при обработке платежа" });
+//     }
+// });
 app.post("/admin/payment", async (req, res) => {
     try {
-        console.log("Данные, полученные на сервере:", req.body);
+        console.log("Data received on server:", req.body);
 
         const {
             userId,
@@ -768,9 +814,11 @@ app.post("/admin/payment", async (req, res) => {
             paymentMethod,
             paymentDate,
         } = req.body;
-        // Расчет суммы для каждого ваучера
+
+        // Calculate the amount for each voucher
         const voucherAmount = amount / numberOfVouchers;
-        // Создание записи о платеже
+
+        // Create a payment record
         const payment = new Payment({
             userId,
             courseId,
@@ -778,28 +826,28 @@ app.post("/admin/payment", async (req, res) => {
             numberOfVouchers,
             paymentMethod,
             paymentDate,
-            description: `Оплата за ${numberOfVouchers} ваучеров для курса ${courseId}`,
+            description: `Payment for ${numberOfVouchers} vouchers for course ${courseId}`,
         });
 
         await payment.save();
 
-        // Создание ваучеров
+        // Create vouchers
         for (let i = 0; i < numberOfVouchers; i++) {
             await Voucher.create({
                 userId,
                 courseId,
-                amount: voucherAmount, // Используем рассчитанное значение
+                amount: voucherAmount, // Using the calculated value
 
-                description: "Оплаченный ваучер",
+                description: "Paid voucher",
             });
         }
         res.status(201).json({
-            message: "Платеж обработан и ваучеры созданы",
+            message: "Payment processed and vouchers created",
             payment,
         });
     } catch (error) {
-        console.error("Ошибка при обработке платежа:", error);
-        res.status(500).json({ message: "Ошибка при обработке платежа" });
+        console.error("Error processing payment:", error);
+        res.status(500).json({ message: "Error processing payment" });
     }
 });
 
