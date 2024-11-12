@@ -23,8 +23,8 @@ app.use(express.json());
 
 app.use(
     cors({
-        origin: "*",
-        //origin: "https://fun-kids.netlify.app", // Укажите URL вашего фронтенда
+        //origin: "*",
+        origin: "https://fun-kids.netlify.app", // Укажите URL вашего фронтенда
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true,
     })
